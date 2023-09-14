@@ -58,4 +58,4 @@ jobs:
         
         
       - name: Build cluster
-        run: kops update --name ${{ inputs.cluster_name }} --state $KOPS_STATE_STORE --yes --admin
+        run: kops update --name ${{ inputs.cluster_name }} --state $KOPS_STATE_STORE --yes 
