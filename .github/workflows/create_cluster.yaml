@@ -39,22 +39,22 @@ jobs:
              chmod +x kops
              sudo mv kops /usr/local/bin/kops
 
-      - name: Creating cluster
-        run: |
-             export KOPS_STATE_STORE="s3://${{ inputs.kops_state_store }}"
-             export CONTROL_PLANE_SIZE="c5.large"
-             export NODE_SIZE="m5.large"
-             export ZONES="us-east-1a,us-east-1b,us-east-1c"
-             kops create cluster ${{ inputs.cluster_name }} \
-             --node-count 3 \
-             --zones $ZONES \
-             --node-size $NODE_SIZE \
-             --control-plane-size $CONTROL_PLANE_SIZE \
-             --control-plane-zones $ZONES \
-             --networking cilium \
-             --topology private \
-             --bastion="true" \
-             --yes
+    #   - name: Creating cluster
+    #     run: |
+    #          export KOPS_STATE_STORE="s3://${{ inputs.kops_state_store }}"
+    #          export CONTROL_PLANE_SIZE="c5.large"
+    #          export NODE_SIZE="m5.large"
+    #          export ZONES="us-east-1a,us-east-1b,us-east-1c"
+    #          kops create cluster ${{ inputs.cluster_name }} \
+    #          --node-count 3 \
+    #          --zones $ZONES \
+    #          --node-size $NODE_SIZE \
+    #          --control-plane-size $CONTROL_PLANE_SIZE \
+    #          --control-plane-zones $ZONES \
+    #          --networking cilium \
+    #          --topology private \
+    #          --bastion="true" \
+    #          --yes
         
         
       - name: Build cluster
