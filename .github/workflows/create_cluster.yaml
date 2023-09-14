@@ -1,0 +1,61 @@
+name: creating cluster
+
+on:     
+   workflow_dispatch:
+    inputs:
+      cluster_name:
+        description: 'cluster name'     
+        required: true
+        type: choice
+        options:
+            - select name
+            - kubeclusterapp.com
+      kops_state_store:
+        description: 'busket name'
+        required: true
+        type: choice
+        options:
+            - select bucket
+            - kops-state-bk2
+
+
+jobs:
+    createCluster:
+      runs-on: ubuntu-latest
+      steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Installing kops
+        run: |
+             curl -Lo kops https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+             chmod +x kops
+             sudo mv kops /usr/local/bin/kops
+
+      - name: Creating cluster
+        run: |
+             export KOPS_STATE_STORE="s3://${{ inputs.kops_state_store }}"
+             export CONTROL_PLANE_SIZE="c5.large"
+             export NODE_SIZE="m5.large"
+             export ZONES="us-east-1a,us-east-1b,us-east-1c"
+             kops create cluster ${{ inputs.cluster_name }} \
+             --node-count 3 \
+             --zones $ZONES \
+             --node-size $NODE_SIZE \
+             --control-plane-size $CONTROL_PLANE_SIZE \
+             --control-plane-zones $ZONES \
+             --networking cilium \
+             --topology private \
+             --bastion="true" \
+             --yes
+        
+        
+      - name: Build cluster
+        run: kops update --name ${{ inputs.cluster_name }} --state $KOPS_STATE_STORE --yes --admin
